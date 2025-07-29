@@ -1,0 +1,610 @@
+/* 精灵球容器 - 全新设计 */
+.pokeball-container {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 800px;
+  transform-style: preserve-3d;
+  animation: float 1.8s ease-in-out infinite;
+}
+
+/* 精灵球主体 */
+.pokeball {
+  position: relative;
+  width: 60px;
+  height: 60px; 
+  border-radius: 50%;
+  box-sizing: border-box;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  transform-style: preserve-3d;
+  animation: rotate 1.5s ease-in-out infinite;
+  overflow: visible; /* 允许子元素超出边界 */
+}
+
+/* 精灵球上半部分 - 鲜艳红色 */
+.pokeball-top {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  left: 0;
+  top: 0;
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(160deg, #ff5252 0%, #d50000 60%, #b71c1c 100%);
+  border: 2px solid #000;
+  border-bottom: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 2;
+  transform-origin: bottom center;
+  animation: top-shake 1s ease-in-out infinite alternate;
+}
+
+/* 精灵球反光效果 */
+.pokeball-shine {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  top: 15%;
+  left: 10%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  filter: blur(1px);
+  z-index: 10;
+  opacity: 0.8;
+  animation: shine-move 4s ease-in-out infinite;
+}
+
+/* 精灵球下半部分 - 纯白色 */
+.pokeball-bottom {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 30px 30px;
+  background: linear-gradient(160deg, #ffffff 0%, #f5f5f5 70%, #e0e0e0 100%);
+  border: 2px solid #000;
+  border-top: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 2;
+  transform-origin: top center;
+  animation: bottom-shake 1s ease-in-out 0.5s infinite alternate;
+}
+
+/* 精灵球中间黑色带 */
+.pokeball-band {
+  position: absolute;
+  width: 60px;
+  height: 8px;
+  left: 0;
+  top: 26px;
+  background-color: #000;
+  box-sizing: border-box;
+  z-index: 4;
+}
+
+/* 精灵球中间按钮外圈 */
+.pokeball-button-outer {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 21px;
+  left: 21px;
+  background-color: #000;
+  border-radius: 50%;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+/* 精灵球中间按钮 */
+.pokeball-button {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 23px;
+  left: 23px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 50%, #bdbdbd 100%);
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  z-index: 6;
+  animation: button-glow 1.2s infinite alternate;
+}
+
+/* 按钮内圈 */
+.pokeball-button-inner {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  top: 27px;
+  left: 27px;
+  background-color: #bdbdbd;
+  border-radius: 50%;
+  box-sizing: border-box;
+  z-index: 7;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  animation: inner-pulse 1s ease-in-out infinite alternate;
+}
+
+/* 捕获特效容器 */
+.pokeball-capture-effect {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  top: 0;
+  left: 0;
+  z-index: 8;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: capture-sequence 3s ease-in-out infinite;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* 捕获光线 */
+.capture-rays {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  top: -30px;
+  left: -30px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0) 30%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0) 72%);
+  border-radius: 50%;
+  opacity: 0;
+  box-sizing: border-box;
+  transform: scale(0);
+  animation: rays-expand 3s ease-in-out infinite;
+}
+
+/* 捕获环 */
+.capture-ring {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  top: 0;
+  left: 0;
+  border: 3px solid rgba(255, 255, 255, 0);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: ring-expand 3s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+}
+
+/* 星星效果 */
+.capture-star {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #fff;
+  opacity: 0;
+  border-radius: 50%;
+  filter: blur(1px);
+  box-sizing: border-box;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+  animation: star-appear 3s linear infinite;
+}
+
+.star-1 { top: 12px; left: 12px; animation-delay: 0.1s; }
+.star-2 { top: 12px; left: 42px; animation-delay: 0.3s; }
+.star-3 { top: 42px; left: 18px; animation-delay: 0.5s; }
+.star-4 { top: 36px; left: 45px; animation-delay: 0.7s; }
+.star-5 { top: 24px; left: 30px; animation-delay: 0.9s; }
+
+/* ===== 动画定义 ===== */
+
+/* 精灵球弹跳动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    transform: translateY(-10%) scale(0.95);
+  }
+  40% {
+    transform: translateY(-15%) scale(1.05);
+  }
+  60% {
+    transform: translateY(-10%) scale(0.98);
+  }
+  80% {
+    transform: translateY(-5%) scale(1.02);
+  }
+}
+
+/* 精灵球旋转动画 */
+@keyframes rotate {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(8deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(4deg);
+  }
+}
+
+/* 上半部抖动 */
+@keyframes top-shake {
+  0%, 100% { transform: rotateX(0); }
+  50% { transform: rotateX(-10deg); }
+}
+
+/* 下半部抖动 */
+@keyframes bottom-shake {
+  0%, 100% { transform: rotateX(0); }
+  50% { transform: rotateX(10deg); }
+}
+
+/* 反光移动 */
+@keyframes shine-move {
+  0%, 100% { opacity: 0.8; transform: translate(0, 0); }
+  25% { opacity: 0.4; transform: translate(20%, 10%); }
+  50% { opacity: 0.6; transform: translate(10%, 20%); }
+  75% { opacity: 0.2; transform: translate(-10%, 10%); }
+}
+
+/* 按钮发光 */
+@keyframes button-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4); }
+}
+
+/* 内圈脉冲 */
+@keyframes inner-pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0.3; }
+}
+
+/* 捕获序列 */
+@keyframes capture-sequence {
+  0%, 85%, 100% { opacity: 0; }
+  20%, 75% { opacity: 1; }
+}
+
+/* 光线扩展 */
+@keyframes rays-expand {
+  0%, 85%, 100% { transform: scale(0); opacity: 0; }
+  20% { transform: scale(0.2); opacity: 0.8; }
+  70% { transform: scale(1); opacity: 0; }
+}
+
+/* 光环扩展 */
+@keyframes ring-expand {
+  0%, 15% { transform: scale(0.2); border-color: rgba(255, 255, 255, 0); }
+  20% { transform: scale(0.3); border-color: rgba(255, 255, 255, 0.9); }
+  70% { transform: scale(1.8); border-color: rgba(255, 255, 255, 0); }
+  100% { transform: scale(2); border-color: rgba(255, 255, 255, 0); }
+}
+
+/* 星星出现 */
+@keyframes star-appear {
+  0%, 15%, 85%, 100% { transform: scale(0); opacity: 0; }
+  20%, 30% { transform: scale(1.5); opacity: 1; }
+  40%, 70% { transform: scale(0.8); opacity: 0.7; }
+  80% { transform: scale(1.2); opacity: 0; }
+}
+
+/* 小尺寸适配 */
+.w-6.h-6 {
+  .pokeball {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .pokeball-top {
+    width: 24px;
+    height: 12px;
+    border-radius: 12px 12px 0 0;
+    border-width: 1px;
+  }
+  
+  .pokeball-bottom {
+    width: 24px;
+    height: 12px;
+    border-radius: 0 0 12px 12px;
+    border-width: 1px;
+  }
+  
+  .pokeball-band {
+    width: 24px;
+    height: 3px;
+    top: 10px;
+    border-width: 1px;
+  }
+  
+  .pokeball-button-outer {
+    width: 8px;
+    height: 8px;
+    top: 8px;
+    left: 8px;
+  }
+  
+  .pokeball-button {
+    width: 6px;
+    height: 6px;
+    top: 9px;
+    left: 9px;
+  }
+  
+  .pokeball-button-inner {
+    width: 3px;
+    height: 3px;
+    top: 10px;
+    left: 10px;
+  }
+  
+  .pokeball-capture-effect {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .capture-rays {
+    width: 48px;
+    height: 48px;
+    top: -12px;
+    left: -12px;
+  }
+  
+  .capture-ring {
+    width: 24px;
+    height: 24px;
+    border-width: 1px;
+  }
+  
+  .capture-star {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .star-1 { top: 5px; left: 5px; }
+  .star-2 { top: 5px; left: 16px; }
+  .star-3 { top: 16px; left: 7px; }
+  .star-4 { top: 15px; left: 18px; }
+  .star-5 { top: 10px; left: 12px; }
+}
+
+/* 中等尺寸适配（默认） */
+.pokeball-container {
+  .pokeball {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* 小尺寸适配 */
+.w-10.h-10 {
+  .pokeball {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .pokeball-top {
+    width: 40px;
+    height: 20px;
+    border-radius: 20px 20px 0 0;
+    border-width: 1px;
+  }
+  
+  .pokeball-bottom {
+    width: 40px;
+    height: 20px;
+    border-radius: 0 0 20px 20px;
+    border-width: 1px;
+  }
+  
+  .pokeball-band {
+    width: 40px;
+    height: 5px;
+    top: 17px;
+    border-width: 1px;
+  }
+  
+  .pokeball-button-outer {
+    width: 12px;
+    height: 12px;
+    top: 14px;
+    left: 14px;
+  }
+  
+  .pokeball-button {
+    width: 9px;
+    height: 9px;
+    top: 15px;
+    left: 15px;
+  }
+  
+  .pokeball-button-inner {
+    width: 4px;
+    height: 4px;
+    top: 18px;
+    left: 18px;
+  }
+  
+  .pokeball-capture-effect {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .capture-rays {
+    width: 80px;
+    height: 80px;
+    top: -20px;
+    left: -20px;
+  }
+  
+  .capture-ring {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+  }
+  
+  .capture-star {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .star-1 { top: 8px; left: 8px; }
+  .star-2 { top: 8px; left: 28px; }
+  .star-3 { top: 28px; left: 12px; }
+  .star-4 { top: 24px; left: 30px; }
+  .star-5 { top: 16px; left: 20px; }
+}
+
+/* 大尺寸适配 */
+.w-16.h-16 {
+  .pokeball {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .pokeball-top {
+    width: 64px;
+    height: 32px;
+    border-radius: 32px 32px 0 0;
+  }
+  
+  .pokeball-bottom {
+    width: 64px;
+    height: 32px;
+    border-radius: 0 0 32px 32px;
+  }
+  
+  .pokeball-band {
+    width: 64px;
+    height: 8px;
+    top: 28px;
+  }
+  
+  .pokeball-button-outer {
+    width: 20px;
+    height: 20px;
+    top: 22px;
+    left: 22px;
+  }
+  
+  .pokeball-button {
+    width: 15px;
+    height: 15px;
+    top: 24px;
+    left: 24px;
+  }
+  
+  .pokeball-button-inner {
+    width: 7px;
+    height: 7px;
+    top: 28px;
+    left: 28px;
+  }
+  
+  .pokeball-capture-effect {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .capture-rays {
+    width: 128px;
+    height: 128px;
+    top: -32px;
+    left: -32px;
+  }
+  
+  .capture-ring {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .capture-star {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .star-1 { top: 13px; left: 13px; }
+  .star-2 { top: 13px; left: 45px; }
+  .star-3 { top: 45px; left: 19px; }
+  .star-4 { top: 38px; left: 48px; }
+  .star-5 { top: 25px; left: 32px; }
+}
+
+/* 超大尺寸适配 */
+.w-24.h-24 {
+  .pokeball {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .pokeball-top {
+    width: 96px;
+    height: 48px;
+    border-radius: 48px 48px 0 0;
+  }
+  
+  .pokeball-bottom {
+    width: 96px;
+    height: 48px;
+    border-radius: 0 0 48px 48px;
+  }
+  
+  .pokeball-band {
+    width: 96px;
+    height: 12px;
+    top: 42px;
+  }
+  
+  .pokeball-button-outer {
+    width: 30px;
+    height: 30px;
+    top: 33px;
+    left: 33px;
+  }
+  
+  .pokeball-button {
+    width: 22px;
+    height: 22px;
+    top: 37px;
+    left: 37px;
+  }
+  
+  .pokeball-button-inner {
+    width: 10px;
+    height: 10px;
+    top: 43px;
+    left: 43px;
+  }
+  
+  .pokeball-capture-effect {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .capture-rays {
+    width: 192px;
+    height: 192px;
+    top: -48px;
+    left: -48px;
+  }
+  
+  .capture-ring {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .capture-star {
+    width: 9px;
+    height: 9px;
+  }
+  
+  .star-1 { top: 19px; left: 19px; }
+  .star-2 { top: 19px; left: 67px; }
+  .star-3 { top: 67px; left: 29px; }
+  .star-4 { top: 57px; left: 72px; }
+  .star-5 { top: 38px; left: 48px; }
+} 

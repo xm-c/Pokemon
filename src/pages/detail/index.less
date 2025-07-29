@@ -1,0 +1,156 @@
+.detail-page {
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pokemon-header {
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
+}
+
+.pokemon-header-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+.pokemon-id {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 60px;
+  font-weight: 800;
+  opacity: 0.3;
+  color: white;
+}
+
+.pokemon-image-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.pokemon-image {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.pokemon-image:hover {
+  transform: scale(1.05);
+}
+
+.pokemon-name {
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  margin-top: 8px;
+  z-index: 2;
+  position: relative;
+}
+
+.stats-bar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.stats-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-in-out;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--primary-color);
+  padding-left: 8px;
+}
+
+.info-box {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+/* 特性描述相关样式 */
+.ability-chip {
+  position: relative;
+  cursor: pointer;
+}
+
+.ability-description {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  color: #333;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  pointer-events: none;
+}
+
+.ability-chip:hover .ability-description {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 动画效果 */
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.98);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.98);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

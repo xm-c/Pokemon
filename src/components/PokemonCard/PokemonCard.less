@@ -1,0 +1,176 @@
+/* PokemonCard 专属样式文件 */
+
+/* 只保留加载动画相关样式，渐变背景将使用 Tailwind CSS 实现 */
+
+/* 卡片加载动画相关样式 */
+.card-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 精灵球容器 - 卡片专用 */
+.card-pokeball-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 精灵球主体 - 卡片专用 */
+.card-pokeball {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  animation: card-pokeball-bounce 1.5s ease-in-out infinite;
+}
+
+/* 精灵球上半部分 - 卡片专用 */
+.card-pokeball-top {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  left: 0;
+  top: 0;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(160deg, #ff5252 0%, #d50000 60%, #b71c1c 100%);
+  border: 1px solid #000;
+  border-bottom: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform-origin: bottom center;
+  animation: card-top-shake 1s ease-in-out infinite alternate;
+}
+
+/* 精灵球反光效果 - 卡片专用 */
+.card-pokeball-shine {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  top: 15%;
+  left: 10%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  filter: blur(1px);
+  opacity: 0.8;
+  animation: card-shine-move 3s ease-in-out infinite;
+}
+
+/* 精灵球下半部分 - 卡片专用 */
+.card-pokeball-bottom {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(160deg, #ffffff 0%, #f5f5f5 70%, #e0e0e0 100%);
+  border: 1px solid #000;
+  border-top: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform-origin: top center;
+  animation: card-bottom-shake 1s ease-in-out 0.5s infinite alternate;
+}
+
+/* 精灵球中间黑色带 - 卡片专用 */
+.card-pokeball-band {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  top: 18px;
+  background-color: #000;
+  z-index: 2;
+}
+
+/* 精灵球中间按钮外圈 - 卡片专用 */
+.card-pokeball-button-outer {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 14px;
+  left: 14px;
+  background-color: #000;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+/* 精灵球中间按钮 - 卡片专用 */
+.card-pokeball-button {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 16px;
+  left: 16px;
+  background: #f5f5f5;
+  border-radius: 50%;
+  z-index: 4;
+  animation: card-button-pulse 1.2s infinite alternate;
+}
+
+/* 加载文本样式 - 卡片专用 */
+.card-loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6b7280;
+  animation: card-text-pulse 1.5s infinite ease-in-out;
+}
+
+/* 动画定义 - 全部使用卡片专用命名空间 */
+
+/* 精灵球弹跳动画 */
+@keyframes card-pokeball-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    transform: translateY(-4px) scale(0.95);
+  }
+  40% {
+    transform: translateY(-6px) scale(1.05);
+  }
+  60% {
+    transform: translateY(-4px) scale(0.98);
+  }
+  80% {
+    transform: translateY(-2px) scale(1.02);
+  }
+}
+
+/* 上半部抖动 */
+@keyframes card-top-shake {
+  0%, 100% { transform: rotateX(0); }
+  50% { transform: rotateX(-8deg); }
+}
+
+/* 下半部抖动 */
+@keyframes card-bottom-shake {
+  0%, 100% { transform: rotateX(0); }
+  50% { transform: rotateX(8deg); }
+}
+
+/* 反光移动 */
+@keyframes card-shine-move {
+  0%, 100% { opacity: 0.8; transform: translate(0, 0); }
+  25% { opacity: 0.4; transform: translate(20%, 10%); }
+  50% { opacity: 0.6; transform: translate(10%, 20%); }
+  75% { opacity: 0.2; transform: translate(-10%, 10%); }
+}
+
+/* 按钮脉冲 */
+@keyframes card-button-pulse {
+  0% { box-shadow: 0 0 2px rgba(255, 255, 255, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.4); }
+}
+
+/* 文本脉冲动画 */
+@keyframes card-text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+} 

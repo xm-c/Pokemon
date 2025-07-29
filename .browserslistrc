@@ -1,0 +1,11 @@
+# 开发环境配置
+[development]
+last 1 chrome version
+last 1 firefox version
+last 1 safari version
+ 
+# 生产环境配置  
+[production]
+last 3 versions
+Android >= 4.1
+ios >= 8 
