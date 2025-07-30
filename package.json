@@ -11,13 +11,14 @@
   },
   "scripts": {
     "prepare": "husky",
+    "check-node": "node -e \"if (process.versions.node.split('.')[0] < 20) { console.error('\\nError: This project requires Node.js 20 or higher. Current version: ' + process.versions.node); process.exit(1); }\"",
     "new": "taro new",
     "patch": "weapp-tw patch",
     "build:weapp": "npm run patch && taro build --type weapp",
     "build:swan": "taro build --type swan",
     "build:alipay": "taro build --type alipay",
     "build:tt": "taro build --type tt",
-    "build:h5": "taro build --type h5",
+    "build:h5": "npm run check-node && taro build --type h5",
     "build:rn": "taro build --type rn",
     "build:qq": "taro build --type qq",
     "build:jd": "taro build --type jd",
@@ -26,7 +27,7 @@
     "dev:swan": "npm run build:swan -- --watch",
     "dev:alipay": "npm run build:alipay -- --watch",
     "dev:tt": "npm run build:tt -- --watch",
-    "dev:h5": "npm run build:h5 -- --watch",
+    "dev:h5": "npm run check-node && npm run build:h5 -- --watch",
     "dev:rn": "npm run build:rn -- --watch",
     "dev:qq": "npm run build:qq -- --watch",
     "dev:jd": "npm run build:jd -- --watch",
@@ -35,7 +36,7 @@
   },
   "author": "",
   "dependencies": {
-    "@babel/runtime": "^7.24.4",
+    "@babel/runtime": "^7.28.2",
     "@tarojs/components": "4.1.4",
     "@tarojs/components-advanced": "^4.1.4",
     "@tarojs/helper": "4.1.4",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/plugin-transform-class-properties": "7.25.9",
+    "@babel/plugin-transform-runtime": "^7.28.0",
     "@babel/preset-react": "^7.24.1",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
@@ -66,6 +68,7 @@
     "@tarojs/plugin-generator": "4.1.4",
     "@tarojs/vite-runner": "4.1.4",
     "@types/react": "^18.0.0",
+    "@vitejs/plugin-legacy": "^4.1.1",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.21",
     "babel-preset-taro": "4.1.4",
@@ -85,6 +88,7 @@
     "terser": "^5.30.4",
     "typescript": "^5.4.5",
     "vite": "^4.2.0",
+    "vite-plugin-cjs-interop": "^2.2.0",
     "weapp-tailwindcss": "^4.2.0-alpha.2"
   }
 }

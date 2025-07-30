@@ -46,6 +46,6 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 ```
 LoadingSpinner/
 ├── index.tsx    # 组件主文件
-├── LoadingSpinner.less  # 样式文件
+├── style.less   # 样式文件
 └── README.md    # 文档
 ``` 

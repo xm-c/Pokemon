@@ -4,6 +4,7 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import { POKEMON_TYPES, REGIONS } from '../../utils/constants';
 import TypeBadge from '../../components/TypeBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { Storage, Toast } from '../../utils/storage';
 import './index.less';
 
 interface SearchHistoryItem {

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { EvolutionChain as EvolutionChainType, EvolutionChainLink } from '../services/types';
-import { getEvolutionChain, getPokemonDetail, getPokemonSpecies } from '../services/api';
-import { getPokemonChineseName } from '../utils/pokemonNames';
-import LoadingSpinner from './LoadingSpinner';
+import { EvolutionChain as EvolutionChainType, EvolutionChainLink } from '../../services/types';
+import { getEvolutionChain, getPokemonDetail, getPokemonSpecies } from '../../services/api';
+import { getPokemonChineseName } from '../../utils/pokemonNames';
+import LoadingSpinner from '../LoadingSpinner';
 
 interface EvolutionChainProps {
   evolutionChainUrl: string;

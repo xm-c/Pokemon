@@ -14,9 +14,9 @@ PokemonCard 组件是一个展示单个宝可梦信息的卡片组件，包含�
 
 ## 文件结构
 
-- `PokemonCard.tsx`: 组件主要逻辑与渲染
-- `PokemonCard.less`: 组件专用样式，包含加载动画
-- `index.tsx`: 组件导出文件
+- `index.tsx`: 组件主要逻辑与渲染
+- `style.less`: 组件专用样式，包含加载动画
+- `README.md`: 组件文档
 
 ## 使用方法
 

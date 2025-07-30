@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import { usePokemonMoves } from '../hooks/usePokemonMoves';
-import { MoveDetail } from '../services/types';
-import { POKEMON_TYPES } from '../utils/constants';
-import LoadingSpinner from './LoadingSpinner';
+import { usePokemonMoves } from '../../hooks/usePokemonMoves';
+import { MoveDetail } from '../../services/types';
+import { POKEMON_TYPES } from '../../utils/constants';
+import LoadingSpinner from '../LoadingSpinner';
 import { 
   formatPokemonName, 
   getMoveChineseName, 
   extractMoveChineseDescription 
-} from '../utils/pokemonNames';
+} from '../../utils/pokemonNames';
 
 interface MovesListProps {
   moves: any[];

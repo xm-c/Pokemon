@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from '@tarojs/components';
-import { POKEMON_TYPES } from '../utils/constants';
+import { POKEMON_TYPES } from '../../utils/constants';
 
 interface TypeBadgeProps {
   type: string;

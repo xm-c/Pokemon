@@ -1,4 +1,7 @@
-import Taro from '@tarojs/taro';
+import Taro, { request } from '@tarojs/taro';
+
+// 添加平台检测
+const isH5 = process.env.TARO_ENV === 'h5';
 
 // 缓存过期时间（7天）
 const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000;
@@ -33,6 +36,11 @@ interface CacheMetadata {
  */
 const getCacheMetadata = (): CacheMetadata => {
   try {
+    if (isH5) {
+      const meta = localStorage.getItem(CACHE_META_KEY);
+      return meta ? JSON.parse(meta) : {};
+    }
+    
     const meta = Taro.getStorageSync(CACHE_META_KEY);
     return meta ? JSON.parse(meta) : {};
   } catch (e) {
@@ -46,6 +54,11 @@ const getCacheMetadata = (): CacheMetadata => {
  */
 const saveCacheMetadata = (metadata: CacheMetadata): void => {
   try {
+    if (isH5) {
+      localStorage.setItem(CACHE_META_KEY, JSON.stringify(metadata));
+      return;
+    }
+    
     Taro.setStorageSync(CACHE_META_KEY, JSON.stringify(metadata));
   } catch (e) {
     console.error('保存图片缓存元数据失败:', e);
@@ -91,6 +104,11 @@ const saveCacheMetadata = (metadata: CacheMetadata): void => {
  */
 const isFileAccessible = async (filePath: string): Promise<boolean> => {
   try {
+    if (isH5) {
+      // H5环境：检查localStorage中是否存在
+      return !!localStorage.getItem(`cached_image_${btoa(filePath)}`);
+    }
+    
     await Taro.getFileInfo({
       filePath
     });
@@ -184,10 +202,16 @@ const cleanExpiredCache = async (): Promise<void> => {
           
           // 删除过期文件
           if (fileExists) {
-            await Taro.removeSavedFile({
-              filePath: data.path,
-              fail: () => {} // 忽略错误
-            });
+            if (isH5) {
+              // H5环境：删除localStorage中的缓存
+              localStorage.removeItem(`cached_image_${btoa(data.path)}`);
+            } else {
+              // 小程序环境：删除本地文件
+              await Taro.removeSavedFile({
+                filePath: data.path,
+                fail: () => {} // 忽略错误
+              });
+            }
           }
           
           delete metadata[url];
@@ -231,22 +255,50 @@ const downloadWithRetry = async (
     
     console.log(`尝试下载图片: ${requestUrl.substring(0, 30)}...`);
     
+    if (isH5) {
+      // H5环境：使用fetch下载
+      const response = await fetch(requestUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP错误: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      return new Promise((resolve, reject) => {
+        reader.onload = () => {
+          const base64Data = reader.result as string;
+          const cacheKey = `cached_image_${btoa(requestUrl)}`;
+          
+          try {
+            // 存储到localStorage
+            localStorage.setItem(cacheKey, base64Data);
+            console.log(`图片下载成功(H5): ${url.substring(0, 50)}...`);
+            resolve(base64Data);
+          } catch (storageError) {
+            console.warn('localStorage存储失败:', storageError);
+            resolve(requestUrl); // 返回原URL作为备用
+          }
+        };
+        reader.onerror = () => reject(new Error('读取图片数据失败'));
+        reader.readAsDataURL(blob);
+      });
+    }
+    
+    // 小程序环境：使用原有逻辑
     const res = await Taro.downloadFile({
       url: requestUrl,
-      timeout: 15000 // 增加超时时间
+      timeout: 15000
     });
 
     if (res.statusCode === 200) {
       try {
-        // 保存到本地文件系统
         const saveRes = await Taro.saveFile({
           tempFilePath: res.tempFilePath
         });
         
-        // 类型断言获取正确的属性
         const savedPath = saveRes && 'savedFilePath' in saveRes ? saveRes.savedFilePath : res.tempFilePath;
         
-        // 验证文件是否正常保存
         if (await isFileAccessible(savedPath)) {
           console.log(`图片下载成功: ${url.substring(0, 50)}...`);
           return savedPath;
@@ -254,7 +306,7 @@ const downloadWithRetry = async (
         throw new Error('文件保存后无法访问');
       } catch (saveError) {
         console.warn('保存文件失败:', saveError);
-        return res.tempFilePath; // 返回临时路径作为备用
+        return res.tempFilePath;
       }
     } else {
       throw new Error(`HTTP错误: ${res.statusCode}`);
@@ -326,6 +378,13 @@ export const getCachedImagePath = async (url: string): Promise<string> => {
         // 检查文件是否存在
         const fileExists = await isFileAccessible(metadata[url].path);
         if (fileExists) {
+          if (isH5) {
+            // H5环境：返回缓存的base64数据
+            const cachedData = localStorage.getItem(`cached_image_${btoa(metadata[url].path)}`);
+            if (cachedData) {
+              return cachedData;
+            }
+          }
           return metadata[url].path;
         }
         

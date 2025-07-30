@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from '@tarojs/components';
-import './LoadingSpinner.less';
+import './style.less';
 
 interface LoadingSpinnerProps {
   size?: 'mini' | 'small' | 'medium' | 'large';

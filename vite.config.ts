@@ -1,16 +1,27 @@
 import { defineConfig } from 'vite';
 import { UnifiedViteWeappTailwindcssPlugin as uvtw } from 'weapp-tailwindcss/vite';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig({
   plugins: [
-    // 直接在vite插件系统中配置
     uvtw({
-      // rem转rpx
       rem2rpx: true,
-      // 根据不同平台决定是否禁用
       disabled: process.env.TARO_ENV === 'h5' || process.env.TARO_ENV === 'harmony' || process.env.TARO_ENV === 'rn',
-      // 由于taro vite默认会移除所有的tailwindcss css变量，所以一定要开启这个配置，进行css变量的重新注入
       injectAdditionalCssVarScope: true,
-    })
-  ]
+    }),
+    // 只保留legacy插件，提供必要的polyfills
+    legacy({
+      targets: 'defaults',
+      polyfills: ['es.array.includes', 'es.array.is-array', 'es.object.assign', 'es.promise'],
+      renderLegacyChunks: false,
+    }),
+  ],
+  // 最小化配置
+  esbuild: {
+    target: 'es2015'
+  },
+  // 基本的全局变量定义
+  define: {
+    global: 'globalThis',
+  }
 }); 
