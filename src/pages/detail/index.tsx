@@ -4,13 +4,20 @@ import Taro, { useRouter } from '@tarojs/taro';
 import { usePokemonDetail } from '../../hooks/usePokemonData';
 import { getPokemonChineseName, getAbilityChineseName } from '../../utils/pokemonNames';
 import { POKEMON_TYPES } from '../../utils/constants';
+
 import TypeBadge from '../../components/TypeBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EvolutionChain from '../../components/EvolutionChain';
 import MovesList from '../../components/MovesList';
+import OptimizedImage from '../../components/OptimizedImage';
 import './index.less';
 import { getAbilityDetail, getAbilityDetails } from '../../services/api';
 import { AbilityDetail } from '../../services/types';
+import { 
+  getPokemonMainImageUrls, 
+  getPokemonAnimatedImageUrls, 
+  getPokemonPlaceholderUrl 
+} from '../../utils/pokemonImageUrls';
 
 interface StatDisplayProps {
   name: string;
@@ -55,22 +62,128 @@ const StatDisplay: React.FC<StatDisplayProps> = ({
 const Detail: React.FC = () => {
   const router = useRouter();
   const { id } = router.params;
-  const { pokemon, species, loading, error } = usePokemonDetail(Number(id));
-  const [animatedImage, setAnimatedImage] = useState<string | null>(null);
+  const { pokemon, species, loading, error, refreshing, refresh } = usePokemonDetail(Number(id));
   const [abilityDetails, setAbilityDetails] = useState<Record<string, AbilityDetail>>({});
+  const [scrollTop, setScrollTop] = useState(0);
+  
+  // 🎯 新增：下拉刷新状态管理
+  const [isPullingDown, setIsPullingDown] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [touchStartY, setTouchStartY] = useState(0);
+  const [touchStartTime, setTouchStartTime] = useState(0);
 
-  useEffect(() => {
-    // 获取动画图片
-    if (pokemon && pokemon.sprites.versions && 
-        pokemon.sprites.versions['generation-v'] && 
-        pokemon.sprites.versions['generation-v']['black-white'] && 
-        pokemon.sprites.versions['generation-v']['black-white'].animated &&
-        pokemon.sprites.versions['generation-v']['black-white'].animated.front_default) {
-      setAnimatedImage(pokemon.sprites.versions['generation-v']['black-white'].animated.front_default);
-    } else {
-      setAnimatedImage(null);
+  // 🎯 移除动态图片状态管理，交由OptimizedImage组件处理
+
+  // 🎯 修改：简化的滚动事件处理
+  const handleScroll = (e) => {
+    const newScrollTop = e.detail.scrollTop;
+    setScrollTop(newScrollTop);
+    
+    // 不在顶部时重置下拉状态
+    if (newScrollTop > 0 && isPullingDown) {
+      setIsPullingDown(false);
+      setPullDistance(0);
     }
-  }, [pokemon]);
+    
+    // 开发环境调试信息
+    if (process.env.NODE_ENV === 'development' && newScrollTop === 0 && scrollTop !== 0) {
+      console.log('📍 到达页面顶部，可以下拉刷新');
+    }
+  };
+
+  // 🎯 新增：触摸事件处理
+  const handleTouchStart = (e) => {
+    if (scrollTop !== 0 || isRefreshing) return;
+    
+    const touch = e.touches[0];
+    setTouchStartY(touch.clientY);
+    setTouchStartTime(Date.now());
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartY === 0 || scrollTop !== 0 || isRefreshing) return;
+    
+    const touch = e.touches[0];
+    const deltaY = touch.clientY - touchStartY;
+    
+    // 只处理向下拖拽
+    if (deltaY > 0) {
+      e.preventDefault(); // 阻止默认滚动
+      const distance = Math.min(deltaY * 0.5, 100); // 阻尼效果
+      setPullDistance(distance);
+      setIsPullingDown(true);
+    } else {
+      // 向上拖拽时重置
+      if (isPullingDown) {
+        setIsPullingDown(false);
+        setPullDistance(0);
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (touchStartY === 0 || scrollTop !== 0 || isRefreshing) {
+      // 重置状态
+      setTouchStartY(0);
+      setTouchStartTime(0);
+      setPullDistance(0);
+      setIsPullingDown(false);
+      return;
+    }
+    
+    // 检查是否应该触发刷新
+    if (pullDistance > 60 && isPullingDown) {
+      console.log('🔄 触发下拉刷新, pullDistance:', pullDistance);
+      await handlePullRefresh();
+    }
+    
+    // 重置状态
+    setTouchStartY(0);
+    setTouchStartTime(0);
+    setPullDistance(0);
+    setIsPullingDown(false);
+  };
+
+  // 🎯 新增：下拉刷新处理函数
+  const handlePullRefresh = async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    setIsPullingDown(false);
+    setPullDistance(0);
+    
+    try {
+      console.log('🔄 开始刷新宝可梦数据...');
+      
+      // 重置所有状态
+      setAbilityDetails({});
+      
+      // 刷新主要数据
+      await refresh();
+      
+      console.log('✅ 刷新完成');
+      
+      // 显示刷新成功提示
+      Taro.showToast({
+        title: '刷新成功',
+        icon: 'success',
+        duration: 1500
+      });
+    } catch (err) {
+      console.error('❌ 刷新失败:', err);
+      // 显示刷新失败提示
+      Taro.showToast({
+        title: '刷新失败，请重试',
+        icon: 'none',
+        duration: 2000
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // 🎯 移除：原来的handleRefresh函数（不再需要）
 
   // 获取特性详情
   useEffect(() => {
@@ -146,7 +259,6 @@ const Detail: React.FC = () => {
   }
 
   const mainColor = getMainColor();
-  const imageUrl = pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default;
   const description = getChineseDescription();
   
   // 调试输出，查看species数据结构
@@ -176,11 +288,16 @@ const Detail: React.FC = () => {
         </View>
         
         {/* 宝可梦图片 */}
-        <View className='pokemon-image-container'>
-          <Image 
-            src={imageUrl}
-            className='pokemon-image animate-pulse'
+        <View className='pokemon-image-container pokemon-main-image'>
+          <OptimizedImage
+            primarySrc={pokemon.sprites.other?.['official-artwork']?.front_default}
+            fallbackSrcs={getPokemonMainImageUrls(pokemon.id, pokemon.sprites)}
+            placeholder={getPokemonPlaceholderUrl(pokemon.id)}
+            className='pokemon-image'
             mode='aspectFit'
+            debugMode={process.env.NODE_ENV === 'development'}
+            imageName={`${pokemon.name}-main`}
+            retryDelay={600}
           />
         </View>
         
@@ -203,7 +320,43 @@ const Detail: React.FC = () => {
       </View>
       
       {/* 内容区 */}
-      <ScrollView className='px-4 pb-safe -mt-5 box-border' scrollY>
+      <ScrollView 
+        className='px-4 pb-safe -mt-5 box-border' 
+        scrollY
+        onScroll={handleScroll}
+        scrollTop={scrollTop}
+        enableBackToTop={false}
+        scrollWithAnimation={false}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          transform: `translateY(${pullDistance}px)`,
+          transition: isPullingDown ? 'none' : 'transform 0.3s ease-out'
+        }}
+      >
+        
+        {/* 🎯 下拉刷新指示器 */}
+        {(isPullingDown || isRefreshing) && (
+          <View className='flex justify-center items-center py-3 bg-gray-50 rounded-lg mx-2 mb-3'>
+            {isRefreshing ? (
+              <View className='flex flex-row items-center'>
+                <LoadingSpinner size='small' />
+                <Text className='text-sm text-blue-600 ml-2'>正在刷新...</Text>
+              </View>
+            ) : (
+              <View className='flex flex-col items-center'>
+                <Text className='text-sm text-gray-600'>
+                  {pullDistance > 60 ? '释放即可刷新' : `下拉刷新 (${Math.round(pullDistance)}/60)`}
+                </Text>
+                {pullDistance > 60 && (
+                  <Text className='text-xs text-green-600 mt-1'>已达到刷新阈值</Text>
+                )}
+              </View>
+            )}
+          </View>
+        )}
+        
         <View className='animate-fade-in-up' style={{ animationDelay: '0.1s' }}>
           {/* 基本信息 */}
           <View className='info-box'>
@@ -280,14 +433,18 @@ const Detail: React.FC = () => {
         </View>
         
         {/* 动态图 */}
-        {animatedImage && (
+        {pokemon && (
           <View className='animate-fade-in-up info-box' style={{ animationDelay: '0.2s' }}>
             <Text className='section-title'>动态图</Text>
-            <View className='flex justify-center my-2'>
-              <Image 
-                src={animatedImage}
-                className='w-32 h-32'
+            <View className='flex justify-center my-2 pokemon-animated-image'>
+              <OptimizedImage
+                primarySrc={pokemon.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default}
+                fallbackSrcs={getPokemonAnimatedImageUrls(pokemon.id, pokemon.sprites)}
+                placeholder={getPokemonPlaceholderUrl(pokemon.id)}
                 mode='aspectFit'
+                debugMode={process.env.NODE_ENV === 'development'}
+                imageName={`${pokemon.name}-animated`}
+                retryDelay={800}
               />
             </View>
           </View>

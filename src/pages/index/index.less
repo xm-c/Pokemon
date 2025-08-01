@@ -587,3 +587,60 @@
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* 免责声明样式 - 固定在最底部 */
+.disclaimer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 4px 12px 2px;
+  opacity: 0.6;
+  z-index: 1000; /* 确保在所有内容之上 */
+  pointer-events: none; /* 不阻挡其他交互 */
+  
+  /* 极其低调的背景 */
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  .disclaimer-text {
+    font-size: 9px;
+    color: #777;
+    line-height: 1.1;
+    margin-bottom: 1px;
+    font-weight: 300;
+    
+    /* 增强可读性的文字阴影 */
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+  }
+  
+  .disclaimer-subtext {
+    font-size: 7px;
+    color: #999;
+    line-height: 1.0;
+    opacity: 0.8;
+    
+    /* 更淡的副文本 */
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+  }
+  
+  /* 在小屏幕上进一步优化 */
+  @media (max-width: 375px) {
+    padding: 3px 8px 1px;
+    
+    .disclaimer-text {
+      font-size: 8px;
+    }
+    
+    .disclaimer-subtext {
+      font-size: 6px;
+    }
+  }
+  
+  /* 对于超小屏幕，可以选择隐藏 */
+  @media (max-width: 320px) {
+    display: none;
+  }
+}

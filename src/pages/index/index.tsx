@@ -10,7 +10,7 @@ import './index.less';
 // 底部状态组件
 const BottomStatus = ({ loading, hasMore, pagesLoaded = 1, cachingImages = false, className = '' }) => {
   return (
-    <View className={`py-4 flex justify-center items-center text-sm text-gray-500 ${className}`}>
+    <View className={`py-2 flex justify-center items-center text-sm text-gray-500 ${className}`}>
       {loading ? (
         <View className='flex items-center'>
           <LoadingSpinner size='mini' />
@@ -333,6 +333,13 @@ const Index: React.FC = () => {
         
         {/* 底部安全区域间距 */}
         <View style={{height: 'env(safe-area-inset-bottom)'}} />
+      </View>
+      
+      {/* 免责声明 - 固定在页面最底部 */}
+      <View className='disclaimer-fixed'>
+        <Text className='disclaimer-text'>
+          ⚠️ 非官方应用，页面仅供展示学习使用
+        </Text>
       </View>
     </View>
   );

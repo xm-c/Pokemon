@@ -207,10 +207,10 @@ const cleanExpiredCache = async (): Promise<void> => {
               localStorage.removeItem(`cached_image_${btoa(data.path)}`);
             } else {
               // 小程序环境：删除本地文件
-              await Taro.removeSavedFile({
-                filePath: data.path,
-                fail: () => {} // 忽略错误
-              });
+            await Taro.removeSavedFile({
+              filePath: data.path,
+              fail: () => {} // 忽略错误
+            });
             }
           }
           

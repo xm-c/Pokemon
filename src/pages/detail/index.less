@@ -1,6 +1,13 @@
+/* 页面主容器 */
 .detail-page {
   min-height: 100vh;
-  padding-bottom: env(safe-area-inset-bottom);
+  background: #f5f5f5;
+}
+
+/* 优化滚动体验 */
+.detail-page .taro-scroll-view {
+  /* 平滑滚动 */
+  scroll-behavior: smooth;
 }
 
 .pokemon-header {
@@ -153,4 +160,57 @@
     opacity: 1;
     transform: translateY(0);
   }
+} 
+
+/* 刷新提示样式 */
+.refresh-indicator {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: refreshSlideDown 0.3s ease-out;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      #007AFF 20%, 
+      #007AFF 80%, 
+      transparent
+    );
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+}
+
+@keyframes refreshSlideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 自定义下拉刷新动画 */
+@keyframes pullToRefresh {
+  0% {
+    transform: translateY(-20px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.refresh-custom-indicator {
+  animation: pullToRefresh 0.3s ease-out;
 } 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
+import Taro from '@tarojs/taro';
 import { getPokemonList, getPokemonDetail, searchPokemons, getPokemonSpecies, getEvolutionChain } from '../services/api';
 import { PokemonBasic, PokemonDetail, PokemonSpecies, EvolutionChain } from '../services/types';
-import { preloadImages } from '../utils/imageCache';
 
 // 每页加载的宝可梦数量
 export const POKEMONS_PER_PAGE = 20;
@@ -61,18 +61,80 @@ export const usePokemonList = () => {
     }
   };
 
-  // 预加载宝可梦图片
+  // 🎯 跨平台图片预加载策略
   const preloadPokemonImages = async (pokemonList: PokemonBasic[]) => {
-    // 提取ID用于构建图片URL
-    const imageUrls = pokemonList.map(pokemon => {
-      // 从URL提取宝可梦ID
+    if (!pokemonList || pokemonList.length === 0) return;
+    
+    // 批量预加载，限制并发数量避免过载
+    const BATCH_SIZE = 5;
+    const CONCURRENT_LIMIT = 2; // 降低并发数，提高成功率
+    
+    // 提取图片URL（只预加载第一优先级的图片源）
+    const imageUrls = pokemonList.slice(0, BATCH_SIZE).map(pokemon => {
       const id = pokemon.url.split('/').filter(Boolean).pop();
-      // 构建官方图片URL
-      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+      const paddedId = parseInt(id || '0', 10).toString().padStart(3, '0');
+      
+      // 优先预加载官方高质量图片
+      return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${paddedId}.png`;
     });
     
-    // 预加载图片
-    preloadImages(imageUrls);
+    // 🎯 跨平台预加载实现
+    const preloadSingleImage = async (url: string): Promise<void> => {
+      return new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.log(`⏰ 预加载超时: ${url.substring(url.lastIndexOf('/') + 1)}`);
+          resolve();
+        }, 5000);
+        
+        // 检查运行环境
+        if (typeof window !== 'undefined' && window.Image) {
+          // 🌐 H5环境: 使用Image对象
+          const img = new Image();
+          img.onload = () => {
+            clearTimeout(timeout);
+            console.log(`✅ 预加载成功(H5): ${url.substring(url.lastIndexOf('/') + 1)}`);
+            resolve();
+          };
+          img.onerror = () => {
+            clearTimeout(timeout);
+            console.log(`❌ 预加载失败(H5): ${url.substring(url.lastIndexOf('/') + 1)}`);
+            resolve();
+          };
+          img.src = url;
+        } else {
+          // 📱 小程序环境: 使用Taro.getImageInfo
+          Taro.getImageInfo({
+            src: url,
+            success: () => {
+              clearTimeout(timeout);
+              console.log(`✅ 预加载成功(小程序): ${url.substring(url.lastIndexOf('/') + 1)}`);
+              resolve();
+            },
+            fail: (err) => {
+              clearTimeout(timeout);
+              console.log(`❌ 预加载失败(小程序): ${url.substring(url.lastIndexOf('/') + 1)}`, err.errMsg);
+              resolve();
+            }
+          });
+        }
+      });
+    };
+    
+    // 分批并发预加载，避免同时加载太多图片
+    for (let i = 0; i < imageUrls.length; i += CONCURRENT_LIMIT) {
+      const batch = imageUrls.slice(i, i + CONCURRENT_LIMIT);
+      
+      await Promise.all(
+        batch.map(url => preloadSingleImage(url))
+      );
+      
+      // 批次间稍作延迟，避免网络拥堵
+      if (i + CONCURRENT_LIMIT < imageUrls.length) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    }
+    
+    console.log(`🖼️ 预加载完成，共处理 ${Math.min(BATCH_SIZE, pokemonList.length)} 张图片`);
   };
 
   // 首次加载
@@ -124,11 +186,15 @@ export const usePokemonDetail = (id: number) => {
   const [evolution, setEvolution] = useState<EvolutionChain | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchPokemonData = async () => {
+  const fetchPokemonData = async (isRefresh = false) => {
       try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
         setLoading(true);
+      }
         
         // 获取宝可梦基本信息
         const pokemonData = await getPokemonDetail(`${id}`);
@@ -169,14 +235,24 @@ export const usePokemonDetail = (id: number) => {
         console.error('获取宝可梦详情失败:', err);
         setError(true);
       } finally {
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
         setLoading(false);
       }
+    }
+  };
+
+  // 刷新数据的方法
+  const refresh = async () => {
+    await fetchPokemonData(true);
     };
 
+  useEffect(() => {
     if (id) {
     fetchPokemonData();
 }
   }, [id]);
   
-  return { pokemon, species, evolution, loading, error };
+  return { pokemon, species, evolution, loading, error, refreshing, refresh };
 };

@@ -95,7 +95,7 @@ const Search: React.FC = () => {
     }
   };
 
-  // 执行搜索
+  // 🎯 恢复：搜索页面只设置条件，跳转回首页执行搜索
   const handleSearch = () => {
     try {
       // 验证搜索条件
@@ -117,13 +117,11 @@ const Search: React.FC = () => {
       // 保存到历史记录
       saveSearchToHistory(searchParams);
       
-      // 将搜索参数存储到本地，供首页使用
+      // 🎯 将搜索参数传递给首页，让首页负责搜索和分页
       Taro.setStorageSync('currentSearchParams', searchParams);
-      
-      // 设置一个标志，表示需要在首页执行搜索
       Taro.setStorageSync('shouldSearch', true);
       
-      // 跳转回主页
+      // 跳转回主页，让主页执行搜索并展示分页结果
       Taro.navigateBack({
         success: () => {
           console.log('已返回首页，搜索参数已保存:', searchParams);
@@ -153,16 +151,14 @@ const Search: React.FC = () => {
       setSelectedRegion(item.region || null);
       setIsSearching(true);
       
-      // 将搜索参数存储到本地，供首页使用
       const searchParams = {
         name: item.name || undefined,
         type: item.type || undefined,
         region: item.region || undefined
       };
       
+      // 将搜索参数传递给首页
       Taro.setStorageSync('currentSearchParams', searchParams);
-      
-      // 设置一个标志，表示需要在首页执行搜索
       Taro.setStorageSync('shouldSearch', true);
       
       // 跳转回主页
@@ -176,7 +172,6 @@ const Search: React.FC = () => {
           setIsSearching(false);
         },
         complete: () => {
-          // 无论成功还是失败，重置搜索状态
           setTimeout(() => setIsSearching(false), 100);
         }
       });
@@ -280,7 +275,7 @@ const Search: React.FC = () => {
               className='px-6 py-3 bg-gray-200 rounded-lg flex items-center justify-center'
               onClick={resetFilters}
             >
-              <Text className='text-base text-gray-700'>重置</Text>
+              <Text className='text-sm text-gray-700'>重置</Text>
             </View>
             <View 
               className={`px-6 py-3 bg-primary rounded-lg flex items-center justify-center ${isSearching ? 'opacity-70' : ''}`}
@@ -289,7 +284,7 @@ const Search: React.FC = () => {
               {isSearching ? (
                 <LoadingSpinner size='small' />
               ) : (
-                <Text className='text-base text-white'>搜索</Text>
+                <Text className='text-sm text-white'>搜索</Text>
               )}
             </View>
           </View>

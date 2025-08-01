@@ -203,7 +203,7 @@ const MovesList: React.FC<MovesListProps> = ({ moves }) => {
     isPreloading 
   } = usePokemonMoves(moves);
   const [expandedMove, setExpandedMove] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>('all');
+  const [filter, setFilter] = useState<string>('level-up'); // 默认只显示升级技能
   const [loadedMovesCount, setLoadedMovesCount] = useState(0);
 
   // 在组件挂载时启动后台预加载，但不阻塞界面
@@ -270,7 +270,22 @@ const MovesList: React.FC<MovesListProps> = ({ moves }) => {
               全部 ({processedMoves.length})
             </Text>
           </View>
-          {Object.entries(learnMethodCounts).map(([method, count]) => (
+          
+          {/* 🎯 默认只显示"升级"技能，其他学习方式已注释 */}
+          <View 
+            className={`mr-2 px-4 py-2 rounded-full ${filter === 'level-up' ? 'bg-primary text-white' : 'bg-gray-100'}`}
+            onClick={() => setFilter('level-up')}
+          >
+            <Text className={filter === 'level-up' ? 'text-white' : 'text-gray-700'}>
+              升级 ({learnMethodCounts['level-up'] || 0})
+            </Text>
+          </View>
+          
+          {/* 
+          // 🔒 注释其他学习方式的过滤器
+          {Object.entries(learnMethodCounts)
+            .filter(([method]) => method !== 'level-up') // 排除已显示的升级
+            .map(([method, count]) => (
             <View 
               key={method}
               className={`mr-2 px-4 py-2 rounded-full ${filter === method ? 'bg-primary text-white' : 'bg-gray-100'}`}
@@ -281,6 +296,7 @@ const MovesList: React.FC<MovesListProps> = ({ moves }) => {
               </Text>
             </View>
           ))}
+          */}
         </View>
       </ScrollView>
 
