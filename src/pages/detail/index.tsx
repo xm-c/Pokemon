@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
+import { View, Text, ScrollView } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { usePokemonDetail } from '../../hooks/usePokemonData';
 import { getPokemonChineseName, getAbilityChineseName } from '../../utils/pokemonNames';
@@ -11,7 +11,7 @@ import EvolutionChain from '../../components/EvolutionChain';
 import MovesList from '../../components/MovesList';
 import OptimizedImage from '../../components/OptimizedImage';
 import './index.less';
-import { getAbilityDetail, getAbilityDetails } from '../../services/api';
+import { getAbilityDetails } from '../../services/api';
 import { AbilityDetail } from '../../services/types';
 import { 
   getPokemonMainImageUrls, 

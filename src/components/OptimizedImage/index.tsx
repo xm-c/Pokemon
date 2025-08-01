@@ -17,7 +17,6 @@ interface OptimizedImageProps {
   // 功能配置
   showLoadingSpinner?: boolean;
   showErrorPlaceholder?: boolean;
-  retryCount?: number;
   retryDelay?: number;
   
   // 事件回调
@@ -45,7 +44,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   mode = 'aspectFit',
   showLoadingSpinner = true,
   showErrorPlaceholder = true,
-  retryCount = 3,
   retryDelay = 1000,
   onLoad,
   onError,
