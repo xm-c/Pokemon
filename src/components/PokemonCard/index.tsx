@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { formatPokemonName, getPokemonChineseName } from '../../utils/pokemonNames';
+import { formatPokemonName } from '../../utils/pokemonNames';
+import { useChineseName } from '../../hooks/useChineseName';
 import { POKEMON_TYPES } from '../../utils/constants';
 import { getPokemonBaseInfo, getTypesByIdRange, getOptimizedImageUrls } from '../../utils/pokemonBaseData';
 import './style.less';
@@ -22,7 +23,7 @@ const extractPokemonId = (url: string): number => {
 const TypeBadge: React.FC<{ type: string }> = ({ type }) => {
   const typeInfo = POKEMON_TYPES[type];
   if (!typeInfo) return null;
-
+  
   return (
     <View 
       className='type-badge'
@@ -106,12 +107,17 @@ const PokemonImage: React.FC<{ id: number; name: string }> = ({ id, name }) => {
 
 // 🎯 轻量级Pokemon卡片
 const PokemonCard: React.FC<PokemonCardProps> = ({ name, url, onClick }) => {
-  const id = extractPokemonId(url);
+        const id = extractPokemonId(url);
   
-  // 🎯 使用预定义的中文名称映射，避免API请求
-  const chineseName = getPokemonChineseName(name);
-  const displayName = chineseName || formatPokemonName(name);
+  // 🎯 渐进式中文名称获取 - 先显示本地名称，再异步获取官方名称
+  const { chineseName, isLoading, source } = useChineseName(name, undefined, {
+    priority: 'both', // 优先本地，后台获取API
+    enableApiUpdate: true // 启用API更新
+  });
   
+  // 🎯 格式化显示名称为"中文（英文）"格式
+  const displayName = chineseName ? `${chineseName}（${formatPokemonName(name)}）` : formatPokemonName(name);
+        
   // 🎯 获取Pokemon类型 - 优先使用基础数据映射，否则使用ID范围推测
   const pokemonTypes = useMemo(() => {
     const baseInfo = getPokemonBaseInfo(name);
@@ -125,7 +131,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({ name, url, onClick }) => {
   const handleClick = useCallback(() => {
     if (onClick) {
       onClick(id);
-    } else {
+            } else {
       Taro.navigateTo({
         url: `/pages/detail/index?id=${id}`,
         fail: (err) => {
@@ -150,7 +156,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({ name, url, onClick }) => {
       borderLeft: `3px solid ${baseColor}60`
     };
   }, [typeColor]);
-
+  
   return (
     <View 
       className='pokemon-card-light rounded-lg p-3 shadow-sm border border-gray-100 mb-3 transition-all duration-200 hover:shadow-md active:scale-95'
@@ -165,9 +171,19 @@ const PokemonCard: React.FC<PokemonCardProps> = ({ name, url, onClick }) => {
       <View className='flex items-center justify-between relative z-10'>
         {/* 左侧信息 */}
         <View className='flex-1 pr-2'>
-          <Text className='font-semibold text-base text-gray-800 mb-1'>
-            {displayName}
-          </Text>
+          <View className='flex flex-row items-center mb-1'>
+            <Text className='font-semibold text-base text-gray-800 flex-1'>
+              {displayName}
+            </Text>
+            {process.env.NODE_ENV === 'development' && (
+              <Text className='text-xs ml-1' style={{ opacity: 0.6 }}>
+                {source === 'api' ? '📡' : source === 'local' ? '📚' : '🔤'}
+              </Text>
+            )}
+            {isLoading && (
+              <Text className='text-xs ml-1 animate-pulse'>⏳</Text>
+            )}
+          </View>
           
           {/* 类型标签 */}
           <View className='flex flex-row flex-wrap'>

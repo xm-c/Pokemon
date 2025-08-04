@@ -5,6 +5,7 @@ import SearchBar from '../../components/SearchBar';
 import PokemonCard from '../../components/PokemonCard/';
 import LoadingSpinner from '../../components/LoadingSpinner/';
 import { usePokemonList } from '../../hooks/usePokemonData';
+// import { useBatchChineseNames } from '../../hooks/useChineseName'; // 可选优化：批量获取中文名称
 import './index.less';
 
 // 底部状态组件
@@ -55,6 +56,10 @@ const Index: React.FC = () => {
     resetSearch,
     loadMore 
   } = usePokemonList();
+
+  // 🎯 可选优化：批量获取中文名称以提升列表性能
+  // const pokemonNames = pokemons.map(p => p.name);
+  // const chineseNamesMap = useBatchChineseNames(pokemonNames);
   
   // 获取设备信息以设置视口高度
   useEffect(() => {

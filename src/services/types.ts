@@ -1,8 +1,13 @@
 // 宝可梦基础信息类型
 export interface PokemonBasic {
-  id: number;
   name: string;
   url: string;
+}
+
+// 扩展的宝可梦基础数据，包含可选的species信息
+export interface PokemonBasicWithSpecies extends PokemonBasic {
+  species?: PokemonSpecies; // 可选的物种信息，用于获取官方中文名称
+  id?: number; // 可选的ID，用于优化数据获取
 }
 
 // 宝可梦列表响应类型
@@ -11,6 +16,14 @@ export interface PokemonListResponse {
   next: string | null;
   previous: string | null;
   results: PokemonBasic[];
+}
+
+// 扩展的列表响应，支持带species的数据
+export interface PokemonListResponseWithSpecies {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PokemonBasicWithSpecies[];
 }
 
 // 宝可梦类型信息

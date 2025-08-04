@@ -3,7 +3,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { EvolutionChain as EvolutionChainType, EvolutionChainLink } from '../../services/types';
 import { getEvolutionChain, getPokemonDetail, getPokemonSpecies } from '../../services/api';
-import { getPokemonChineseName } from '../../utils/pokemonNames';
+import { getPokemonChineseName, formatPokemonName } from '../../utils/pokemonNames';
 import LoadingSpinner from '../LoadingSpinner';
 
 interface EvolutionChainProps {
@@ -22,6 +22,14 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // 🎯 格式化Pokemon名称为"中文（英文）"格式
+  const formatDisplayName = (name: string, species: any): string => {
+    const chineseName = getPokemonChineseName(name, species);
+    // 确保中文名称是纯中文（不包含英文部分）
+    const pureName = chineseName && chineseName.includes('（') ? chineseName.split('（')[0] : chineseName;
+    return pureName ? `${pureName}（${formatPokemonName(name)}）` : formatPokemonName(name);
+  };
 
   // 使用useCallback包装fetchEvolutionChain函数，以便于重试功能
   const fetchEvolutionChain = useCallback(async () => {
@@ -90,7 +98,7 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
       
       currentStage.push({
         id: baseSpeciesId,
-        name: getPokemonChineseName(currentChain.species.name, speciesData),
+        name: formatDisplayName(currentChain.species.name, speciesData),
         imageUrl: pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default
       });
           
@@ -141,7 +149,7 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
           
           currentStage.push({
             id: speciesId,
-            name: getPokemonChineseName(evolution.species.name, speciesData),
+            name: formatDisplayName(evolution.species.name, speciesData),
             imageUrl: pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default,
             condition
           });

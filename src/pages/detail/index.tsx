@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { usePokemonDetail } from '../../hooks/usePokemonData';
-import { getPokemonChineseName, getAbilityChineseName } from '../../utils/pokemonNames';
+import { getPokemonChineseName, getAbilityChineseName, formatPokemonName } from '../../utils/pokemonNames';
 import { POKEMON_TYPES } from '../../utils/constants';
 
 import TypeBadge from '../../components/TypeBadge';
@@ -346,7 +346,12 @@ const Detail: React.FC = () => {
         
         {/* 宝可梦名称 */}
         <View className='pokemon-name'>
-          {species ? getPokemonChineseName(pokemon.name, species) : pokemon.name}
+          {(() => {
+            const chineseName = species ? getPokemonChineseName(pokemon.name, species) : null;
+            // 确保中文名称是纯中文（不包含英文部分）
+            const pureName = chineseName && chineseName.includes('（') ? chineseName.split('（')[0] : chineseName;
+            return pureName ? `${pureName}（${formatPokemonName(pokemon.name)}）` : formatPokemonName(pokemon.name);
+          })()}
         </View>
         
         {/* 类型标签 */}
