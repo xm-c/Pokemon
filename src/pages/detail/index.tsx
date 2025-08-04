@@ -73,6 +73,29 @@ const Detail: React.FC = () => {
   const [touchStartY, setTouchStartY] = useState(0);
   const [touchStartTime, setTouchStartTime] = useState(0);
 
+  // 🎯 预加载关键图片策略 - 当Pokemon数据加载完成后立即预加载
+  useEffect(() => {
+    if (pokemon && typeof window !== 'undefined') {
+      // 预加载主要图片的前2个源
+      const preloadUrls = [
+        pokemon.sprites.other?.['official-artwork']?.front_default,
+        ...getPokemonMainImageUrls(pokemon.id, pokemon.sprites).slice(0, 1),
+        ...getPokemonAnimatedImageUrls(pokemon.id, pokemon.sprites).slice(0, 1)
+      ].filter(Boolean);
+      
+      preloadUrls.forEach(url => {
+        if (url) {
+          const img = new Image();
+          img.src = url;
+        }
+      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚀 预加载${preloadUrls.length}张图片:`, preloadUrls);
+      }
+    }
+  }, [pokemon]);
+
   // 🎯 移除动态图片状态管理，交由OptimizedImage组件处理
 
   // 🎯 修改：简化的滚动事件处理
@@ -297,7 +320,9 @@ const Detail: React.FC = () => {
             mode='aspectFit'
             debugMode={process.env.NODE_ENV === 'development'}
             imageName={`${pokemon.name}-main`}
-            retryDelay={600}
+            retryDelay={200}
+            showLoadingSpinner
+            showErrorPlaceholder
           />
         </View>
         
@@ -444,7 +469,9 @@ const Detail: React.FC = () => {
                 mode='aspectFit'
                 debugMode={process.env.NODE_ENV === 'development'}
                 imageName={`${pokemon.name}-animated`}
-                retryDelay={800}
+                retryDelay={250}
+                showLoadingSpinner
+                showErrorPlaceholder={false}
               />
             </View>
           </View>
