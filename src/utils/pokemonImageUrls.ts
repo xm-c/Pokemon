@@ -3,10 +3,20 @@
  * 优化版本 - 添加更快的CDN源和备选地址
  */
 
+import { POKEMON_BASE_DATA } from './pokemonBaseData';
+
+// 🎯 创建ID到Pokemon名称的快速查找映射表
+const ID_TO_NAME_MAP: Record<number, string> = {};
+
+// 初始化ID映射表
+Object.entries(POKEMON_BASE_DATA).forEach(([name, data]) => {
+  ID_TO_NAME_MAP[data.id] = data.name;
+});
+
 /**
  * 获取Pokemon主图片的多个备选URL（按速度优先级排序）
  */
-export const getPokemonMainImageUrls = (id: number, sprites?: any): string[] => {
+export const getPokemonMainImageUrls = (id: number, sprites?: any, pokemonName?: string): string[] => {
   const urls: string[] = [];
   const paddedId = id.toString().padStart(3, '0');
   
@@ -21,7 +31,8 @@ export const getPokemonMainImageUrls = (id: number, sprites?: any): string[] => 
   urls.push(`https://www.serebii.net/pokemon/art/${paddedId}.png`);
   
   // 🚀 第4优先级：Pokemon数据库高质量图片
-  urls.push(`https://img.pokemondb.net/artwork/large/${getPokemonNameById(id)}.jpg`);
+  const nameForUrl = pokemonName || getPokemonNameById(id);
+  urls.push(`https://img.pokemondb.net/artwork/large/${nameForUrl}.jpg`);
   
   // 第5优先级：原始sprites中的官方艺术图
   if (sprites?.other?.['official-artwork']?.front_default) {
@@ -53,7 +64,7 @@ export const getPokemonMainImageUrls = (id: number, sprites?: any): string[] => 
 /**
  * 获取Pokemon动图的多个备选URL（按速度优先级排序）
  */
-export const getPokemonAnimatedImageUrls = (id: number, sprites?: any): string[] => {
+export const getPokemonAnimatedImageUrls = (id: number, sprites?: any, pokemonName?: string): string[] => {
   const urls: string[] = [];
   const paddedId = id.toString().padStart(3, '0');
   
@@ -61,7 +72,8 @@ export const getPokemonAnimatedImageUrls = (id: number, sprites?: any): string[]
   urls.push(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/front_default/${id}.gif`);
   
   // 🚀 第2优先级：Showdown动图（速度快）
-  urls.push(`https://play.pokemonshowdown.com/sprites/ani/${getPokemonNameById(id).toLowerCase()}.gif`);
+  const nameForUrl = pokemonName || getPokemonNameById(id);
+  urls.push(`https://play.pokemonshowdown.com/sprites/ani/${nameForUrl.toLowerCase()}.gif`);
   
   // 第3优先级：原始sprites中的动图
   if (sprites?.versions?.['generation-v']?.['black-white']?.animated?.front_default) {
@@ -69,7 +81,7 @@ export const getPokemonAnimatedImageUrls = (id: number, sprites?: any): string[]
   }
   
   // 🚀 第4优先级：Pokemon数据库动图
-  urls.push(`https://img.pokemondb.net/sprites/black-white/anim/normal/${getPokemonNameById(id)}.gif`);
+  urls.push(`https://img.pokemondb.net/sprites/black-white/anim/normal/${nameForUrl}.gif`);
   
   // 第5优先级：其他世代的动图
   if (sprites?.versions?.['generation-vii']?.['ultra-sun-ultra-moon']?.front_default) {
@@ -90,7 +102,7 @@ export const getPokemonAnimatedImageUrls = (id: number, sprites?: any): string[]
   }
   
   // 🚀 第9优先级：备用动图CDN
-  urls.push(`https://projectpokemon.org/images/normal-sprite/${getPokemonNameById(id).toLowerCase()}.gif`);
+  urls.push(`https://projectpokemon.org/images/normal-sprite/${nameForUrl.toLowerCase()}.gif`);
   
   // 第10优先级：如果没有动图，使用静态图片作为备选
   urls.push(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`);
@@ -108,21 +120,67 @@ export const getPokemonPlaceholderUrl = (id: number): string => {
 
 /**
  * 根据ID获取Pokemon名称（用于构建某些URL）
+ * 利用完整的Pokemon基础数据，覆盖所有世代
  */
 const getPokemonNameById = (id: number): string => {
-  // 这里是一个简化的映射，实际项目中可以扩展
-  const pokemonNames: Record<number, string> = {
-    1: 'bulbasaur', 2: 'ivysaur', 3: 'venusaur', 4: 'charmander', 5: 'charmeleon',
-    6: 'charizard', 7: 'squirtle', 8: 'wartortle', 9: 'blastoise', 10: 'caterpie',
-    11: 'metapod', 12: 'butterfree', 13: 'weedle', 14: 'kakuna', 15: 'beedrill',
-    16: 'pidgey', 17: 'pidgeotto', 18: 'pidgeot', 19: 'rattata', 20: 'raticate',
-    25: 'pikachu', 26: 'raichu', 39: 'jigglypuff', 52: 'meowth', 54: 'psyduck',
-    58: 'growlithe', 59: 'arcanine', 104: 'cubone', 105: 'marowak', 129: 'magikarp',
-    130: 'gyarados', 131: 'lapras', 132: 'ditto', 133: 'eevee', 134: 'vaporeon',
-    135: 'jolteon', 136: 'flareon', 144: 'articuno', 145: 'zapdos', 146: 'moltres',
-    147: 'dratini', 148: 'dragonair', 149: 'dragonite', 150: 'mewtwo', 151: 'mew'
+  // 🎯 优先使用完整的Pokemon基础数据映射表
+  if (ID_TO_NAME_MAP[id]) {
+    return ID_TO_NAME_MAP[id];
+  }
+  
+  // 🎯 对于未在基础数据中的Pokemon，提供智能备选策略
+  // 基于ID范围的常见Pokemon名称模式推测
+  const fallbackNames: Record<number, string> = {
+    // 第二世代剩余的热门Pokemon
+    153: 'bayleef', 154: 'meganium', 156: 'quilava', 157: 'typhlosion',
+    159: 'croconaw', 160: 'feraligatr', 
+    
+    // 第三世代剩余的热门Pokemon  
+    253: 'grovyle', 254: 'sceptile', 256: 'combusken', 
+    259: 'marshtomp', 260: 'swampert',
+    
+    // 第四世代剩余的热门Pokemon
+    387: 'turtwig', 388: 'grotle', 389: 'torterra',
+    390: 'chimchar', 391: 'monferno', 392: 'infernape',
+    393: 'piplup', 394: 'prinplup', 395: 'empoleon',
+    
+    // 第五世代剩余的热门Pokemon
+    495: 'snivy', 496: 'servine', 497: 'serperior',
+    498: 'tepig', 499: 'pignite', 500: 'emboar',
+    501: 'oshawott', 502: 'dewott', 503: 'samurott',
+    
+    // 第六世代热门Pokemon
+    650: 'chespin', 653: 'fennekin', 656: 'froakie',
+    658: 'greninja', 
+    
+    // 第七世代热门Pokemon
+    722: 'rowlet', 725: 'litten', 728: 'popplio',
+    
+    // 第八世代热门Pokemon
+    810: 'grookey', 813: 'scorbunny', 816: 'sobble'
   };
   
-  // 如果有已知的名称映射，使用它；否则使用通用格式
-  return pokemonNames[id] || `pokemon-${id}`;
+  if (fallbackNames[id]) {
+    return fallbackNames[id];
+  }
+  
+  // 🎯 最终备选：使用通用格式，但添加一些智能规律
+  // 根据ID范围判断可能的世代和常见命名模式
+  if (id <= 151) {
+    return `gen1-pokemon-${id}`;
+  } else if (id <= 251) {
+    return `gen2-pokemon-${id}`;
+  } else if (id <= 386) {
+    return `gen3-pokemon-${id}`;
+  } else if (id <= 493) {
+    return `gen4-pokemon-${id}`;
+  } else if (id <= 649) {
+    return `gen5-pokemon-${id}`;
+  } else if (id <= 721) {
+    return `gen6-pokemon-${id}`;
+  } else if (id <= 809) {
+    return `gen7-pokemon-${id}`;
+  } else {
+    return `gen8-pokemon-${id}`;
+  }
 }; 
