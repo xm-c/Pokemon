@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   specialCharReplacement: {
     // 指定替换规则：冒号转为下划线
     ':': '_',

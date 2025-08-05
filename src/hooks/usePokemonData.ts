@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { getPokemonList, getPokemonDetail, searchPokemons, getPokemonSpecies, getEvolutionChain } from '../services/api';
+import { getPokemonDetail, searchPokemons, getPokemonSpecies, getEvolutionChain } from '../services/api';
 import { PokemonBasic, PokemonDetail, PokemonSpecies, EvolutionChain } from '../services/types';
 
 // 每页加载的宝可梦数量

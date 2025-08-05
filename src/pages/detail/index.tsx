@@ -62,7 +62,7 @@ const StatDisplay: React.FC<StatDisplayProps> = ({
 const Detail: React.FC = () => {
   const router = useRouter();
   const { id } = router.params;
-  const { pokemon, species, loading, error, refreshing, refresh } = usePokemonDetail(Number(id));
+  const { pokemon, species, loading, error, refresh } = usePokemonDetail(Number(id));
   const [abilityDetails, setAbilityDetails] = useState<Record<string, AbilityDetail>>({});
   const [scrollTop, setScrollTop] = useState(0);
   
@@ -71,7 +71,7 @@ const Detail: React.FC = () => {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [touchStartY, setTouchStartY] = useState(0);
-  const [touchStartTime, setTouchStartTime] = useState(0);
+  // Touch start time removed as it's not used
 
     // 🎯 预加载关键图片策略 - 当Pokemon数据加载完成后立即预加载
   useEffect(() => {
@@ -139,7 +139,6 @@ const Detail: React.FC = () => {
     
     const touch = e.touches[0];
     setTouchStartY(touch.clientY);
-    setTouchStartTime(Date.now());
   };
 
   const handleTouchMove = (e) => {
@@ -167,7 +166,6 @@ const Detail: React.FC = () => {
     if (touchStartY === 0 || scrollTop !== 0 || isRefreshing) {
       // 重置状态
       setTouchStartY(0);
-      setTouchStartTime(0);
       setPullDistance(0);
       setIsPullingDown(false);
       return;
@@ -181,7 +179,6 @@ const Detail: React.FC = () => {
     
     // 重置状态
     setTouchStartY(0);
-    setTouchStartTime(0);
     setPullDistance(0);
     setIsPullingDown(false);
   };

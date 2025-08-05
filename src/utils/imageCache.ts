@@ -1,4 +1,4 @@
-import Taro, { request } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
 
 // 添加平台检测
 const isH5 = process.env.TARO_ENV === 'h5';
@@ -7,7 +7,7 @@ const isH5 = process.env.TARO_ENV === 'h5';
 const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 
 // 缓存键前缀
-const CACHE_PREFIX = 'POKEMON_IMG_CACHE_';
+// const CACHE_PREFIX = 'POKEMON_IMG_CACHE_'; // 未使用
 const CACHE_META_KEY = 'POKEMON_IMG_CACHE_META';
 
 // 下载重试配置

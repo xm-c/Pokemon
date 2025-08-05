@@ -15,7 +15,7 @@ class SpeciesCacheManager {
   private cache: SpeciesCache = {};
   private pendingRequests: Map<string, Promise<PokemonSpecies | null>> = new Map();
   private readonly CACHE_TTL = 3600000; // 1小时缓存有效期
-  private readonly MAX_CONCURRENT_REQUESTS = 3; // 最大并发请求数
+  // private readonly MAX_CONCURRENT_REQUESTS = 3; // 最大并发请求数 (未使用)
   private readonly BATCH_SIZE = 5; // 批量处理大小
 
   /**
@@ -195,7 +195,6 @@ class SpeciesCacheManager {
    * 清理过期缓存
    */
   cleanExpiredCache(): void {
-    const now = Date.now();
     Object.keys(this.cache).forEach(key => {
       if (!this.isCacheValid(this.cache[key].timestamp)) {
         delete this.cache[key];
@@ -207,7 +206,6 @@ class SpeciesCacheManager {
    * 获取缓存统计信息
    */
   getCacheStats(): { total: number; expired: number } {
-    const now = Date.now();
     const total = Object.keys(this.cache).length;
     const expired = Object.values(this.cache).filter(
       item => !this.isCacheValid(item.timestamp)

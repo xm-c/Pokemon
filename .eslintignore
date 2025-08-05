@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+lib/
+
+# Configuration files
+*.config.js
+postcss.config.js
+weapp-tailwindcss.config.js
+babel.config.js
+vite.config.ts
+
+# Environment files
+.env*
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db 

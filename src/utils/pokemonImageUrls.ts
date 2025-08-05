@@ -9,7 +9,7 @@ import { POKEMON_BASE_DATA } from './pokemonBaseData';
 const ID_TO_NAME_MAP: Record<number, string> = {};
 
 // 初始化ID映射表
-Object.entries(POKEMON_BASE_DATA).forEach(([name, data]) => {
+Object.entries(POKEMON_BASE_DATA).forEach(([, data]) => {
   ID_TO_NAME_MAP[data.id] = data.name;
 });
 

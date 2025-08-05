@@ -23,8 +23,20 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "strict": false
   },
   "include": ["./src", "./types", "./config"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib",
+    "*.config.js",
+    "postcss.config.js",
+    "weapp-tailwindcss.config.js"
+  ],
   "compileOnSave": false
 }

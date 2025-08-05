@@ -49,7 +49,6 @@ const Index: React.FC = () => {
   const { 
     pokemons, 
     loading, 
-    error, 
     hasMore, 
     totalCount,
     searchPokemon,
@@ -79,7 +78,7 @@ const Index: React.FC = () => {
   }, []);
   
   // 处理滚动事件，仅用于监控滚动位置
-  const handleScroll = (e) => {
+  const handleScroll = () => {
     const now = Date.now();
     // 每16ms才处理一次滚动事件（约60fps）
     if (now - lastScrollTimeRef.current < 16) {

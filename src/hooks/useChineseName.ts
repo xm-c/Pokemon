@@ -119,7 +119,6 @@ export function useChineseName(
  */
 export function useBatchChineseNames(names: string[]): Record<string, UseChineseNameResult> {
   const [results, setResults] = useState<Record<string, UseChineseNameResult>>({});
-  const [batchLoading, setBatchLoading] = useState(false);
 
   useEffect(() => {
     if (!names || names.length === 0) return;
@@ -127,7 +126,6 @@ export function useBatchChineseNames(names: string[]): Record<string, UseChinese
     let mounted = true;
 
     const loadBatchNames = async () => {
-      setBatchLoading(true);
       
       try {
         // 首先设置本地名称
@@ -189,9 +187,7 @@ export function useBatchChineseNames(names: string[]): Record<string, UseChinese
           setResults(errorResults);
         }
       } finally {
-        if (mounted) {
-          setBatchLoading(false);
-        }
+        // Batch loading completed
       }
     };
 

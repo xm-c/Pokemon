@@ -836,7 +836,7 @@ export function getPokemonChineseName(name: string, species?: any): string {
     // 在本地表中查找对应ID的宝可梦
     const entries = Object.entries(POKEMON_CHINESE_NAMES);
     for (let i = 0; i < entries.length; i++) {
-      const [key, value] = entries[i];
+      const [, value] = entries[i];
       if (i + 1 === species.id) { // 索引从0开始，而ID从1开始
         console.log(`[getPokemonChineseName] 通过ID ${species.id} 找到名称: ${value}`);
         return `${value}（${formattedEnglishName}）`;

@@ -9,7 +9,7 @@ import {
   AbilityDetail
 } from './types';
 import { API_BASE_URL, POKEMONS_PER_PAGE } from '../utils/constants';
-import { formatPokemonName, POKEMON_CHINESE_NAMES } from '../utils/pokemonNames';
+import { POKEMON_CHINESE_NAMES } from '../utils/pokemonNames';
 
 // 缓存所有宝可梦数据，避免重复请求
 let cachedPokemons: PokemonListResponse | null = null;
@@ -336,8 +336,7 @@ async function searchPokemonsByEnglish(keyword: string, offset = 0, limit = POKE
           previous: null,
           results: [{
             name: pokemon.name,
-            url: `${API_BASE_URL}/pokemon/${pokemon.id}`,
-            id: pokemon.id
+            url: `${API_BASE_URL}/pokemon/${pokemon.id}`
           }]
         };
       } catch (error) {

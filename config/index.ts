@@ -1,5 +1,5 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
-import type { Plugin } from 'vite'
+import type { Plugin } from 'vite' with { 'resolution-mode': 'import' }
 import { UnifiedViteWeappTailwindcssPlugin as uvtw } from 'weapp-tailwindcss/vite'
 import devConfig from './dev'
 import prodConfig from './prod'
