@@ -104,15 +104,15 @@ export const POKEMON_TYPES = {
   shadow: { name: '暗影', color: '#604E82' },
 };
 
-// 地区列表
+// 地区列表 - ID直接使用PokeAPI的图鉴名称，无需额外映射
 export const REGIONS = [
   { id: 'kanto', name: '关都' },
-  { id: 'johto', name: '城都' },
+  { id: 'updated-johto', name: '城都' },
   { id: 'hoenn', name: '丰缘' },
-  { id: 'sinnoh', name: '神奥' },
-  { id: 'unova', name: '合众' },
-  { id: 'kalos', name: '卡洛斯' },
-  { id: 'alola', name: '阿罗拉' },
+  { id: 'extended-sinnoh', name: '神奥' },
+  { id: 'updated-unova', name: '合众' },
+  { id: 'kalos-central', name: '卡洛斯' },
+  { id: 'updated-alola', name: '阿罗拉' },
   { id: 'galar', name: '伽勒尔' },
   { id: 'hisui', name: '洗翠' },
   { id: 'paldea', name: '帕底亚' },

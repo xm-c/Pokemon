@@ -161,27 +161,12 @@ export async function getPokemonsByType(type: string): Promise<PokemonListRespon
 // 按地区获取宝可梦
 export async function getPokemonsByRegion(region: string): Promise<PokemonListResponse> {
   try {
-    // 地区映射表（处理API中的特殊命名）
-    const regionMappings: Record<string, string> = {
-      'kanto': 'kanto',
-      'johto': 'updated-johto',      // ✅ 修复：使用updated-johto
-      'hoenn': 'hoenn',
-      'sinnoh': 'extended-sinnoh',   // ✅ 修复：使用extended-sinnoh  
-      'unova': 'updated-unova',      // ✅ 修复：使用updated-unova
-      'kalos': 'kalos-central',      // PokéAPI中卡洛斯地区使用central版本
-      'alola': 'updated-alola',      // ✅ 修复：使用updated-alola
-      'galar': 'galar',
-      'hisui': 'hisui',
-      'paldea': 'paldea'
-    };
-    
-    // 获取对应地区的图鉴名称
-    const pokedexName = regionMappings[region] || region;
-    console.log(`尝试获取地区: ${pokedexName} 的宝可梦`);
+    // 直接使用传入的region参数，因为constants.ts中的ID已经是正确的PokeAPI图鉴名称
+    console.log(`尝试获取地区: ${region} 的宝可梦`);
     
     // 获取对应世代的图鉴
     const pokedexResponse = await Taro.request({
-      url: `${API_BASE_URL}/pokedex/${pokedexName}`,
+      url: `${API_BASE_URL}/pokedex/${region}`,
       method: 'GET'
     });
     
@@ -198,7 +183,7 @@ export async function getPokemonsByRegion(region: string): Promise<PokemonListRe
       };
     });
     
-    console.log(`成功获取 ${pokedexName} 地区的 ${pokemons.length} 只宝可梦`);
+    console.log(`成功获取 ${region} 地区的 ${pokemons.length} 只宝可梦`);
     
     // 构造分页响应
     return {
