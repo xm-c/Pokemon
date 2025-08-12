@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Image } from '@tarojs/components';
+import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { EvolutionChainLink } from '../../services/types';
 import { getEvolutionChain, getPokemonDetail, getPokemonSpecies } from '../../services/api';
 import { getPokemonChineseName, formatPokemonName } from '../../utils/pokemonNames';
+import { getPokemonMainImageUrls } from '../../utils/pokemonImageUrls';
+import { preloadImages } from '../../utils/imageCache';
 import LoadingSpinner from '../LoadingSpinner';
+import OptimizedImage from '../OptimizedImage';
 
 interface EvolutionChainProps {
   evolutionChainUrl: string;
@@ -13,7 +16,7 @@ interface EvolutionChainProps {
 interface EvolutionNode {
   id: number;
   name: string;
-  imageUrl: string;
+  imageUrls: string[]; // 改为数组，支持多个备选URL
   condition?: string;
 }
 
@@ -80,6 +83,7 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
     const stages: EvolutionNode[][] = [];
     let currentChain = chain;
     let currentStage: EvolutionNode[] = [];
+    const allImageUrls: string[] = []; // 收集所有图片URL用于预加载
 
     console.log('[processEvolutionChain] 开始处理进化链，起始物种:', currentChain.species);
 
@@ -96,10 +100,14 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
           console.log(`[processEvolutionChain] 获取基础物种信息, ID: ${baseSpeciesId}`);
       const speciesData = await getPokemonSpecies(String(baseSpeciesId));
       
+      // 获取多个备选图片URL
+      const imageUrls = getPokemonMainImageUrls(baseSpeciesId, pokemonData.sprites, currentChain.species.name);
+      allImageUrls.push(...imageUrls);
+      
       currentStage.push({
         id: baseSpeciesId,
         name: formatDisplayName(currentChain.species.name, speciesData),
-        imageUrl: pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default
+        imageUrls
       });
           
           console.log('[processEvolutionChain] 添加基础宝可梦到第一阶段:', currentStage);
@@ -147,10 +155,14 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
             }
           }
           
+          // 获取多个备选图片URL
+          const imageUrls = getPokemonMainImageUrls(speciesId, pokemonData.sprites, evolution.species.name);
+          allImageUrls.push(...imageUrls);
+          
           currentStage.push({
             id: speciesId,
             name: formatDisplayName(evolution.species.name, speciesData),
-            imageUrl: pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default,
+            imageUrls,
             condition
           });
               
@@ -176,6 +188,13 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
     }
     
       console.log('[processEvolutionChain] 进化链处理完成，总共有 ' + stages.length + ' 个阶段');
+      
+      // 预加载所有图片
+      if (allImageUrls.length > 0) {
+        console.log('[processEvolutionChain] 开始预加载进化链图片，共', allImageUrls.length, '张');
+        preloadImages(allImageUrls);
+      }
+      
     return stages;
     } catch (err) {
       console.error('[processEvolutionChain] 处理进化链时发生错误:', err);
@@ -203,46 +222,64 @@ const EvolutionChain: React.FC<EvolutionChainProps> = ({ evolutionChainUrl }) =>
 
   if (loading) {
     return (
-      <View className='flex justify-center items-center p-4'>
+      <View className='flex flex-col justify-center items-center p-6 bg-blue-50 rounded-lg border border-blue-200'>
         <LoadingSpinner size='small' />
-        <Text className='text-gray-500 mt-2'>加载进化链...</Text>
+        <Text className='text-blue-600 font-medium mt-3'>正在加载进化链...</Text>
+        <Text className='text-sm text-gray-500 mt-1 text-center'>
+          正在获取宝可梦进化数据和高清图片
+        </Text>
       </View>
     );
   }
 
   if (error || evolutionStages.length === 0) {
     return (
-      <View className='p-4 text-center'>
-        <Text className='text-red-500'>{errorMessage || '无法加载进化链'}</Text>
+      <View className='p-4 text-center bg-red-50 rounded-lg border border-red-200'>
+        <View className='mb-3'>
+          <Text className='text-lg'>⚠️</Text>
+        </View>
+        <Text className='text-red-600 font-medium mb-2'>{errorMessage || '无法加载进化链'}</Text>
+        <Text className='text-sm text-gray-600 mb-4'>
+          可能是网络问题或数据暂时不可用，请尝试重新加载
+        </Text>
         <View 
-          className='mt-2 px-4 py-2 bg-blue-500 rounded-full inline-block'
+          className='px-6 py-3 bg-blue-500 rounded-full inline-block shadow-sm active:bg-blue-600 transition-colors'
           onClick={handleRetry}
         >
-          <Text className='text-white'>重试加载</Text>
+          <Text className='text-white font-medium'>🔄 重试加载</Text>
         </View>
-        <Text className='text-xs text-gray-500 mt-2 block'>URL: {evolutionChainUrl}</Text>
+        {process.env.NODE_ENV === 'development' && (
+          <Text className='text-xs text-gray-400 mt-3 block break-all'>
+            调试信息: {evolutionChainUrl}
+          </Text>
+        )}
       </View>
     );
   }
 
   return (
-    <View className='p-4 bg-white'>
+    <View className='p-4 bg-white rounded-lg'>
       {evolutionStages.map((stage, stageIndex) => (
         <View key={`stage-${stageIndex}`} className='mb-6'>
           <View className='flex flex-wrap justify-center items-center'>
             {stage.map((pokemon, pokemonIndex) => (
               <View key={`pokemon-${pokemon.id}`} className='flex flex-col items-center mx-2 my-2'>
                 <View 
-                  className='w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center shadow-md'
+                  className='w-20 h-20 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:shadow-xl transition-all duration-300 active:scale-95'
                   onClick={() => handlePokemonClick(pokemon.id)}
                 >
-                  {pokemon.imageUrl && (
-                    <Image 
-                      src={pokemon.imageUrl} 
-                      className='w-16 h-16 object-contain' 
-                      mode='aspectFit'
-                    />
-                  )}
+                  <OptimizedImage
+                    primarySrc={pokemon.imageUrls[0]}
+                    fallbackSrcs={pokemon.imageUrls.slice(1)}
+                    className='w-16 h-16 object-contain'
+                    mode='aspectFit'
+                    showLoadingSpinner
+                    showErrorPlaceholder
+                    debugMode={process.env.NODE_ENV === 'development'}
+                    imageName={`进化链-${pokemon.name}`}
+                    placeholder={`https://via.placeholder.com/64x64/f0f0f0/999999?text=${pokemon.name.charAt(0)}`}
+                    retryDelay={500}
+                  />
                 </View>
                 <Text className='text-sm font-medium mt-2 text-center'>{pokemon.name}</Text>
                 

@@ -114,7 +114,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({ name, url, onClick }) => {
     priority: 'both', // 优先本地，后台获取API
     enableApiUpdate: true // 启用API更新
   });
-  
+        
   // 🎯 格式化显示名称为"中文（英文）"格式
   const displayName = chineseName ? `${chineseName}（${formatPokemonName(name)}）` : formatPokemonName(name);
         

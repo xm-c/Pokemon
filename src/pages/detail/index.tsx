@@ -338,6 +338,10 @@ const Detail: React.FC = () => {
             retryDelay={200}
             showLoadingSpinner
             showErrorPlaceholder
+            enablePreview
+            onPreview={() => {
+              console.log(`🖼️ 预览${pokemon.name}的主图片`);
+            }}
           />
         </View>
         
@@ -492,6 +496,10 @@ const Detail: React.FC = () => {
                 retryDelay={250}
                 showLoadingSpinner
                 showErrorPlaceholder={false}
+                enablePreview
+                onPreview={() => {
+                  console.log(`🖼️ 预览${pokemon.name}的动态图片`);
+                }}
               />
             </View>
           </View>

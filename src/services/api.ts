@@ -164,12 +164,12 @@ export async function getPokemonsByRegion(region: string): Promise<PokemonListRe
     // 地区映射表（处理API中的特殊命名）
     const regionMappings: Record<string, string> = {
       'kanto': 'kanto',
-      'johto': 'johto',
+      'johto': 'updated-johto',      // ✅ 修复：使用updated-johto
       'hoenn': 'hoenn',
-      'sinnoh': 'sinnoh',
-      'unova': 'unova',
-      'kalos': 'kalos-central',  // PokéAPI中卡洛斯地区使用central版本
-      'alola': 'alola',
+      'sinnoh': 'extended-sinnoh',   // ✅ 修复：使用extended-sinnoh  
+      'unova': 'updated-unova',      // ✅ 修复：使用updated-unova
+      'kalos': 'kalos-central',      // PokéAPI中卡洛斯地区使用central版本
+      'alola': 'updated-alola',      // ✅ 修复：使用updated-alola
       'galar': 'galar',
       'hisui': 'hisui',
       'paldea': 'paldea'
@@ -186,11 +186,17 @@ export async function getPokemonsByRegion(region: string): Promise<PokemonListRe
     });
     
     // 提取宝可梦列表
-    const pokemons = pokedexResponse.data.pokemon_entries.map(entry => ({
-      name: entry.pokemon_species.name,
-      url: `${API_BASE_URL}/pokemon/${entry.entry_number}`,
-      id: entry.entry_number
-    }));
+    const pokemons = pokedexResponse.data.pokemon_entries.map(entry => {
+      // 🐛 修复：从pokemon_species.url中提取真实的宝可梦ID，而不是使用地区图鉴编号
+      const speciesUrlParts = entry.pokemon_species.url.split('/').filter(Boolean);
+      const realPokemonId = parseInt(speciesUrlParts[speciesUrlParts.length - 1], 10);
+      
+      return {
+        name: entry.pokemon_species.name,
+        url: `${API_BASE_URL}/pokemon/${realPokemonId}`, // 使用真实ID构建URL
+        id: realPokemonId // 使用真实ID
+      };
+    });
     
     console.log(`成功获取 ${pokedexName} 地区的 ${pokemons.length} 只宝可梦`);
     
